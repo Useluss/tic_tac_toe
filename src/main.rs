@@ -1,16 +1,48 @@
 use clap::Parser;
 use clearscreen;
-use std::fmt::Display;
+use std::{fmt::Display, io, thread, time};
+
+struct Game {
+    board: Board,
+    player_count: usize,
+}
+
+impl Game {
+    // Creates a new instance of Game
+    pub fn new() -> Game {
+        Game {
+            board: Board::new(),
+            player_count: Game::get_player_count(),
+        }
+    }
+
+    fn get_player_count() -> usize {
+        loop {
+            let mut input = String::new();
+            clearscreen::clear().unwrap();
+            println!("How many players are there (1/2):");
+            io::stdin()
+                .read_line(&mut input)
+                .expect("Couldn't read line");
+            let input = match input.trim().parse() {
+                Ok(1) => 1,
+                Ok(2) => 2,
+                _ => {
+                    clearscreen::clear().unwrap();
+                    println!("That was not an option");
+                    thread::sleep(time::Duration::from_millis(850));
+                    continue;
+                }
+            };
+            return input;
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 enum Symbol {
     Circle,
     Cross,
-}
-
-fn main() {
-    let board = Board::new();
-    println!("{}", board); // Debug line
 }
 
 struct Board {
@@ -82,4 +114,8 @@ impl Display for Board {
         }
         writeln!(f, "{}", output)
     }
+}
+
+fn main() {
+    let game = Game::new();
 }
